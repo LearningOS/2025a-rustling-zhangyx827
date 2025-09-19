@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -23,19 +23,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: std::cmp::PartialOrd + Clone> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -56,11 +56,11 @@ impl<T> LinkedList<T> {
         self.length += 1;
     }
 
-    pub fn get(&mut self, index: i32) -> Option<&T> {
+    pub fn get(&self, index: i32) -> Option<&T> {
         self.get_ith_node(self.start, index)
     }
 
-    fn get_ith_node(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
+    fn get_ith_node(&self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
         match node {
             None => None,
             Some(next_ptr) => match index {
@@ -69,20 +69,57 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(list_a:LinkedList<T>, list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut new_list = Self::new();
+        let mut a_ind: i32 = 0;
+        let mut b_ind: i32 = 0;
+        b_ind = 0;
+        let mut cur_a = list_a.start;
+        let mut cur_b = list_b.start;
+        while a_ind < list_a.length as i32 && 
+            b_ind < list_b.length as i32 {
+            unsafe {
+                let a_val = (*(cur_a.unwrap()).as_ptr()).val.clone();
+                let b_val = (*(cur_b.unwrap()).as_ptr()).val.clone();
+                if a_val <= b_val {
+                    new_list.add(a_val);
+                    a_ind += 1;
+                    cur_a = (*(cur_a.unwrap()).as_ptr()).next;
+                } else {
+                    new_list.add(b_val);
+                    cur_b = (*(cur_b.unwrap()).as_ptr()).next;
+                    b_ind += 1;
+                }
+            }
         }
+
+        while a_ind < list_a.length as i32 {
+            unsafe {
+                let a_val = (*(cur_a.unwrap()).as_ptr()).val.clone();
+                new_list.add(a_val);
+                cur_a = (*(cur_a.unwrap()).as_ptr()).next;
+            }
+            a_ind += 1;
+        }
+
+        while b_ind < list_b.length as i32{
+            unsafe {
+                let b_val = (*(cur_b.unwrap()).as_ptr()).val.clone();
+                new_list.add(b_val);
+                cur_b = (*(cur_b.unwrap()).as_ptr()).next;
+            }
+            b_ind += 1;
+        }
+
+        new_list
 	}
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + std::cmp::PartialOrd + std::clone::Clone,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
