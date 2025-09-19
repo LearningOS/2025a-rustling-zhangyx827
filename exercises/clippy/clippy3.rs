@@ -5,6 +5,7 @@
 // Execute `rustlings hint clippy3` or use the `hint` watch subcommand for a hint.
 
 
+
 #[allow(unused_variables, unused_assignments)]
 fn main() {
     let my_option: Option<()> = None;
